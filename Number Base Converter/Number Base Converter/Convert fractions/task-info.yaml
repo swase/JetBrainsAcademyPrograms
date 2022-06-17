@@ -1,0 +1,181 @@
+type: edu
+files:
+- name: src/converter/Main.java
+  visible: true
+  text: |
+    package converter;
+
+    public class Main {
+
+        public static void main(String[] args) {
+            // write your code here
+        }
+    }
+  learner_created: false
+- name: src/converter/Util.java
+  visible: true
+  text: |
+    package converter;
+
+    import java.math.BigDecimal;
+    import java.math.BigInteger;
+
+    public class Util {
+        public static String decimalToTarget(String decValueAsString, int targetBase) {
+            StringBuilder res = new StringBuilder();
+            BigInteger decVal = BigInteger.valueOf(Long.parseLong(decValueAsString));
+            if (decVal.intValue() == 0) {
+                return "0";
+            }
+            BigInteger targetBaseBI = new BigInteger("" + targetBase);
+            //System.out.println(decValueAsString + " " + targetBase);
+            BigInteger[] pair = decVal.divideAndRemainder(targetBaseBI);
+            while (pair[0].intValue() != 0 || pair[1].intValue() != 0) {
+                if (pair[1].intValue() < 10) {
+                    res.append(pair[1].intValue());
+                } else {
+                    //System.out.println();
+                    res.append(getLetterFromVal(pair[1].intValue()));
+                }
+                decVal = decVal.divide(targetBaseBI);
+                pair = decVal.divideAndRemainder(targetBaseBI);
+            }
+            return res.reverse().toString();
+        }
+
+        public static String targetToDecimal(String sourceNum, int sourceBase) {
+            //System.out.println(sourceNum);
+            BigInteger result = new BigInteger("0");
+            String source = new StringBuilder(sourceNum).reverse().toString().toUpperCase();
+            //System.out.println(source);
+            int tempAccum;
+            char currentVal;
+            for(int i = 0; i < source.length(); i++) {
+                currentVal = source.charAt(i);
+                if (Character.isDigit(currentVal)) {
+                    tempAccum = Character.getNumericValue(currentVal);
+                } else {
+                    tempAccum = getLetterValue(currentVal);
+                }
+                result = result.add(new BigDecimal("" +
+                        (tempAccum * Math.pow(sourceBase, i))).toBigInteger());
+                //result += tempAccum * Math.pow(sourceBase, i);
+                //System.out.println(result);
+            }
+            return "" + result.longValue();
+        }
+
+        public static String getLetterFromVal(int decVal) {
+            return "" + (char)(decVal + 87);
+        }
+
+        public static int getLetterValue(char hexChar) {
+            return (int)(Character.toLowerCase(hexChar) - 87);
+        }
+
+    }
+  learner_created: true
+- name: src/converter/Controller.java
+  visible: true
+  text: |
+    package converter;
+
+    import java.util.Locale;
+    import java.util.Scanner;
+
+    public class Menu {
+        Scanner scanner;
+        private boolean exit = false;
+        private boolean baseChosen = false;
+        private int sourceBase;
+        private int targetBase;
+
+        public Menu(Scanner scanner) {
+            this.scanner = scanner;
+        }
+
+        public void run() {
+            while (!exit) {
+                loadMenu();
+                getUserInput();
+            }
+        }
+
+        public void loadMenu() {
+            if (!baseChosen) {
+                System.out.printf("Enter two numbers in format: {source base} {target base} (To quit type /exit) ");
+            } else {
+                System.out.printf("Enter number in base %d to convert to base " +
+                        "%d (To go back type /back) ", sourceBase, targetBase);
+            }
+        }
+
+        private void getUserInput() {
+            if (scanner.hasNext("/.*")) {
+                doControlAction(scanner.nextLine());
+            } else {
+                if (scanner.hasNext(">.*")) {
+                    scanner.skip(">");
+                }
+                doProgramAction();
+            }
+        }
+
+        private void doProgramAction() {
+                if (!baseChosen) {
+                    sourceBase = scanner.nextInt();
+                    targetBase = scanner.nextInt();
+                    scanner.nextLine();
+                    //System.out.println("SourceBase: " + sourceBase + ", TargetBase: " + targetBase);
+                    baseChosen = true;
+                } else {
+                    String result;
+                    result = scanner.nextLine().replace(">", "").trim();
+                    //System.out.println("result: " + result);
+                    if (sourceBase != 10) {result = Util.targetToDecimal(result, sourceBase);}
+                    if (targetBase == 10) {
+                        printConversionResult(result);
+                    } else {
+                        printConversionResult(Util.decimalToTarget(result, targetBase));
+                    }
+                }
+
+        }
+
+        private void doControlAction(String action) {
+            switch (action.toLowerCase()) {
+                case "/exit":
+                    exit = true;
+                    break;
+                case "/back":
+                    baseChosen = false;
+                    sourceBase = 10;
+                    targetBase = 10;
+            }
+        }
+
+        private void printConversionResult(String result) {
+            System.out.printf("Conversion result: %s%n", result);
+        }
+
+    }
+  learner_created: true
+- name: src/converter/FractionMethods.java
+  visible: true
+  learner_created: true
+- name: src/converter/IntegerMethods.java
+  visible: true
+  learner_created: true
+- name: test/NumeralSystemConverterTest.java
+  visible: true
+  learner_created: true
+- name: src/converter/InputProcessing.java
+  visible: true
+  learner_created: true
+feedback_link: https://hyperskill.org/learn/step/13096#comment
+status: Solved
+feedback:
+  message: Well done! You've finished the project. Select a new project on <a href="https://hyperskill.org/projects">JetBrains
+    Academy</a> to continue learning.
+  time: Fri, 17 Jun 2022 15:07:10 UTC
+record: -1
